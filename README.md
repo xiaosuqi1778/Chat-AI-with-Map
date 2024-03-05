@@ -1,4 +1,4 @@
-# MapView
+# Chat AI with Map
 > 这是一款使用团队自定义推荐模型，利用大模型和地图进行交互的地图可视化系统
 
 ## 示例
@@ -29,6 +29,7 @@ npm install
 ```sh
 npm i @chat-ui/vue3
 npm i @amap/map-jsapi-loader --save
+npm install axios
 ```
 #### Compile and Hot-Reload for Development
 ```sh
