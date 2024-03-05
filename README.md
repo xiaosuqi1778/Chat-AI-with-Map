@@ -21,10 +21,14 @@
 
 ### Customize configuration
 See [Vite Configuration Reference](https://vitejs.dev/config/).
-
 #### Project Setup
 ```sh
 npm install
+```
+#### 三方库
+```sh
+npm i @chat-ui/vue3
+npm i @amap/map-jsapi-loader --save
 ```
 #### Compile and Hot-Reload for Development
 ```sh
