@@ -1,0 +1,24 @@
+{
+  "name": "mapview",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@amap/amap-jsapi-loader": "^1.0.1",
+    "@chat-ui/vue3": "^1.0.11",
+    "axios": "^1.6.7",
+    "express": "^4.18.2",
+    "moment": "^2.30.1",
+    "vue": "^3.3.4",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.4.0",
+    "patch-package": "^8.0.0",
+    "vite": "^4.4.11"
+  }
+}
