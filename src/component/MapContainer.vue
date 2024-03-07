@@ -43,6 +43,8 @@ async function fetchChatbotResponse(input) {
             params: {
                 key: robotKey,
                 question: input,
+                uniqueid: '123456',
+                priv:1
             }
         });
         return response;

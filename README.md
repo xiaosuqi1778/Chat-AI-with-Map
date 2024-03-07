@@ -2,11 +2,24 @@
 > 这是一款使用团队自定义推荐模型，利用大模型和地图进行交互的地图可视化系统
 
 ## 示例
-![首页](./documents/image.png)
-![聊天内容POI关键词匹配](./documents/2024-03-05-17-56-55.png)
+- 第三版展示
+> 1. 页面初始化  
+> ![](./documents/2024-03-07-18-27-04.png)
+> 2. 关键字搜索  
+> ![](./documents/2024-03-07-18-27-56.png)
+> 3. 聊天关键词匹配搜索  
+> ![](./documents/2024-03-07-18-36-52.png)
+> 4. 地图点击事件  
+> ![](./documents/2024-03-07-18-37-57.png)
+
+- 第二版展示
+> ![聊天内容POI关键词匹配](./documents/2024-03-05-17-56-55.png "将聊天内容与POI关键词匹配并搜索]")
+> 
+- 第一版展示
+> ![首页](./documents/image.png "首页")
 
 ## 准备
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).  
 
 开发软件：VS Code + Volar插件  
 浏览器：Edge or Chrome （IE8以上）+ vue插件
@@ -57,9 +70,9 @@ npm run build
 > 2. 初始化仓库
 
 ## 相关文档
-`@chat-ui/vue3`：https://www.npmjs.com/package/@chat-ui/vue3?activeTab=readme  
-`高德地图参考手册`：https://lbs.amap.com/api/javascript-api-v2/documentation
-`layui - vue`：http://www.layui-vue.com/zh-CN/index
+- `@chat-ui/vue3`：https://www.npmjs.com/package/@chat-ui/vue3?activeTab=readme  
+- `高德地图参考手册`：https://lbs.amap.com/api/javascript-api-v2/documentation  
+- `layui - vue`：http://www.layui-vue.com/zh-CN/index
 
 ## 相关链接
 `UrbanComp`：www.urbancomp.net
