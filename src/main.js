@@ -5,9 +5,12 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import axios from 'axios';
+import Layui from '@layui/layui-vue'
+import '@layui/layui-vue/lib/index.css'
  
-const app = createApp(App)
+const app = createApp(App);
+app.use(Layui);
 app.config.globalProperties.$axios = axios;
 
-app.mount('#app')
-createApp(App).mount('#app')
+app.mount('#app');
+// createApp(App).mount('#app')

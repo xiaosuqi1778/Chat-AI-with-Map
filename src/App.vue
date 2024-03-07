@@ -6,8 +6,8 @@ import ChatAI from './component/ChatAI.vue';
 
 
 <template>
-  <div class="container">
-    <MapContainer class="mapContainer" />
+  <div>
+    <MapContainer/>
     <!-- <div class="spacer"></div> -->
     <!-- <ChatUI /> -->
     <!-- <ChatAI /> -->
@@ -25,23 +25,5 @@ body {
   position: absolute;
 }
 
-/* 设置mapcontainer 75%，chatui 25% */
-.container {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
 
-.mapContainer {
-  /* flex: 0 0 75%; */
-  width: 70%;
-  height: 100%;
-}
-
-.ChatUI {
-  flex: 0 0 28%;
-  width: 28%;
-  height: 100%;
-  margin-left: auto;
-}
 </style>

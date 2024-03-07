@@ -10,6 +10,7 @@
   "dependencies": {
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@chat-ui/vue3": "^1.0.11",
+    "@layui/layui-vue": "^2.16.2",
     "axios": "^1.6.7",
     "express": "^4.18.2",
     "moment": "^2.30.1",
