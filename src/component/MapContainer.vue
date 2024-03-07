@@ -5,10 +5,10 @@ import { Chat } from "@chat-ui/vue3";
 import { layer } from "@layui/layui-vue";
 import axios from 'axios';
 
-const robotUrl = 'https://apis.tianapi.com/robot/index';
-const robotKey = '6f29320f26e1eddff037652dbf4d3af1'
-const amapKey = '638964ba011ff16f788694feb76aaa9f'
-const amapSecurityCode = '0159cea799e75333853ad41b431413e5'
+const robotUrl = 
+const robotKey = 
+const amapKey = 
+const amapSecurityCode = 
 
 // chatui 部分
 /**
