@@ -26,14 +26,14 @@
 
 ## 开始使用
 ### 填写key
+[此处填写](./src/component/MapContainer.vue) 
 >- 高德地图 JS API  
-[此处位置修改安全密钥](./src/component/MapContainer.vue)  
-![密钥位置](./documents/image3.png)  
 >- 【新】天行机器人 API  
 首先[申请](https://www.tianapi.com/)，搜索`天行机器人`，注册会员（实名认证可选），在`axios.get()`设置参数`key`
 ### Customize configuration
 See [Vite Configuration Reference](https://vitejs.dev/config/).
-1. Project Setup
+1. Project Setup  
+[创建一个vue应用](https://cn.vuejs.org/guide/quick-start.html)
 ```sh
 npm install
 ```
@@ -54,16 +54,20 @@ npm run build
 ```
 
 ## 更新日志
-- `2024.03`:  
+- `2024.03.08`:
+> 1. 新增地图右键菜单功能和在周边搜索功能
+> 2. 发现了一些玄学bug，将`2024.03.06`优化的代码进行部分还原
+> 3. 在发现bug的同时，完善输入匹配搜索功能。这样就完成了`搜索框输入+回车`、`搜索框输入+点击自动匹配关键词`、`搜索框输入+点击搜索`、`聊天对话关键词匹配搜索`、`地图右键单击周边搜索`等多种搜索方式。
+- `2024.03.06`:  
 > 1. 使用layui，更改ui布局和样式
 > 2. 修改一些逻辑上的bug
 > 3. 优化代码
 - `2024.02`：
-> 1. 更改vue文件架构，拟更改项目名为 `Chat AI with Map`
-> 2. 更换聊天机器人api，使用[天行机器人](https://www.tianapi.com/apiview/47)
-> 3. 增加高德地图插件功能：地图定位
+> 1. 增加高德地图插件功能：地图定位
+> 2. 更改项目文件结构，拟更改项目名为 `Chat AI with Map`
+> 3. 更换聊天机器人api，使用[天行机器人](https://www.tianapi.com/apiview/47)
 > 4. 更新ui布局
-> 5. 初步测试聊天与地图交互功能
+> 5. 初步完成聊天与地图交互功能
 > 6. 更新文档
 - `2023.11`：
 > 1. 搭建页面基本架构

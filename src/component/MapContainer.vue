@@ -5,10 +5,10 @@ import { Chat } from "@chat-ui/vue3";
 import { layer } from "@layui/layui-vue";
 import axios from 'axios';
 
-const robotUrl = 
-const robotKey = 
-const amapKey = 
-const amapSecurityCode = 
+const robotUrl         = 'https://apis.tianapi.com/robot/index';
+const robotKey         = '';
+const amapKey          = '';
+const amapSecurityCode = '';
 
 // chatui 部分
 /**
@@ -44,7 +44,7 @@ async function fetchChatbotResponse(input) {
                 key: robotKey,
                 question: input,
                 uniqueid: '123456',
-                priv:1
+                priv: 1
             }
         });
         return response;
@@ -119,11 +119,18 @@ function handleSendEvent(input) {
  * 3.POI搜索，输入提示（后面可以删除）。这个得限制在武汉市内，但是不生效？？
  * 4.点击POI给它加个marker展示详细信息
  * 
- * 5.导航功能？？
+ * 5.导航功能？？ -> 设置起点（待解决）
  * 6.地图样式？？
+ * 
+ * 7.右键菜单 -> 周边搜索
  */
 
 let map = null;
+let contextMenu = null;
+let contextMenuPositon = null;
+const wuhanCenter = [114.304569, 30.593354];
+
+const searchType = '餐饮服务|风景名胜|购物服务|交通设施服务|生活服务|体育休闲服务|医疗保健服务|';
 const searchKeyword = ref('');
 const amapPlugin = ref(['AMap.ToolBar', 'AMap.PlaceSearch', 'AMap.Scale', 'AMap.AutoComplete', 'AMap.Geolocation']);
 //输入提示
@@ -132,11 +139,11 @@ const autoSearchOptions = {
     city: '武汉',
     citylimit: true,
     datatype: 'poi', //返回的数据类型
+    type: searchType
 };
-const placeSearchOptions = {
+let placeSearchOptions = {
     city: '武汉',
     citylimit: true,  //是否强制限制在设置的城市内搜索
-    map: map,
     pageSize: 5, // 单页显示结果条数
     pageIndex: 1, // 页码
     map: map, // 展现结果的地图实例
@@ -170,8 +177,24 @@ onMounted(() => {
                 mapStyle: 'amap://styles/fresh',
                 viewMode: "2D", // 是否为3D地图模式
                 zoom: 12, // 初始化地图级别
-                center: [114.31, 30.52], // 初始化地图中心点位置：武汉市
+                center: wuhanCenter, // 初始化地图中心点位置：武汉市
             });
+
+            contextMenu = new AMap.ContextMenu();
+            //右键回到武汉市范围
+            contextMenu.addItem("回到武汉", () => {
+                map.setZoomAndCenter(12, wuhanCenter);
+            }, 1);
+            //在点周边搜索
+            contextMenu.addItem("在此点周边搜索", (e) => {
+                searchPoiNearBy(contextMenuPositon.lat, contextMenuPositon.lng);
+            }, 0);
+            //地图绑定鼠标右击事件——弹出右键菜单
+            map.on('rightclick', (e) => {
+                contextMenu.open(map, e.lnglat);
+                contextMenuPositon = e.lnglat;
+            });
+
 
             // 异步加载插件
             AMap.plugin(amapPlugin.value, () => {
@@ -203,30 +226,46 @@ onMounted(() => {
                 });
 
                 // 自动查询
-                let placeSearch = new AMap.PlaceSearch(placeSearchOptions);  //构造地点查询类
+                let placeSearch = new AMap.PlaceSearch({
+                    city: '武汉',
+                    citylimit: true,  //是否强制限制在设置的城市内搜索
+                    // map: map,
+                    pageSize: 5, // 单页显示结果条数
+                    pageIndex: 1, // 页码
+                    map: map, // 展现结果的地图实例
+                    panel: 'panel', // 结果列表将在此容器中进行展示。
+                    autoFitView: true // 是否自动调整地图视野使绘制的 Marker点都处于视口的可见范围
+                });  //构造地点查询类
                 // js api 2.0 部分方法废弃 参见：https://lbs.amap.com/api/javascript-api-v2/update
                 let autoSearch = new AMap.AutoComplete(autoSearchOptions);
                 autoSearch.on('select', (e) => {
                     placeSearch.search(e.poi.name, (res) => {
                         console.log('auto search keyword', res);
+                        placeSearch.on('markerClick', function (e) {
+                            // 根据点击marker进行下一步
+                            console.log(e);
+                            getPoiByMarker(e);
+                        });
+                        placeSearch.on('listElementClick', function (e) {
+                            // 根据点击列表进行下一步
+                            console.log(e);
+                            getPoiByList(e);
+                            // 效果一样
+                            /* placeSearch.getDetails(e.data.id, (status, res) => {
+                                console.log('get details', res);
+                            }); */
+                        });
                     });  //关键字查询查询
+
                 });//注册监听，当选中某条记录时会触发
             });
             /**
              * 想获取高德自有poi信息
              * 待解决
-             * 未提供接口方法，只能通过搜索获取
+             * 官方回复：未提供接口方法，只能通过搜索获取
              */
             map.on("click", function (ev) {
-                //触发事件的对象
-                let target = ev.target;
-                //触发事件的地理坐标，AMap.LngLat 类型
-                let lnglat = ev.lnglat;
-                //触发事件的像素坐标，AMap.Pixel 类型
-                let pixel = ev.pixel;
-                //触发事件类型
-                let type = ev.type;
-                console.log('click', target);
+                console.log('click', ev.lnglat);
             });
         })
         .catch((e) => {
@@ -318,7 +357,8 @@ function searchPOI(op) {
         let placeSearch = new AMap.PlaceSearch({
             city: '武汉',
             citylimit: true,  //是否强制限制在设置的城市内搜索
-            map: map,
+            type: searchType, // 兴趣点类别
+            // map: map,
             pageSize: 5, // 单页显示结果条数
             pageIndex: 1, // 页码
             map: map, // 展现结果的地图实例
@@ -351,13 +391,51 @@ function searchPOI(op) {
             }); */
         });
     });
+}
+// 搜索周边POI
+function searchPoiNearBy(lat, lng) {
+    // 判断是否在武汉市
+    if (lat < 29.9784 || lat > 31.3683 || lng < 113.8284 || lng > 115.0514) {
+        layer.msg('请在武汉市内进行搜索', {
+            icon: 7,
+            time: 1500,
+            shade: true,
+            shadeOpacity: 0.25
+        })
+        return;
+    }
 
+    AMap.plugin(['AMap.PlaceSearch'], () => {
+        let placeSearch = new AMap.PlaceSearch({
+            city: '武汉',
+            citylimit: true,  //是否强制限制在设置的城市内搜索
+            type: searchType,
+            // map: map,
+            pageSize: 5, // 单页显示结果条数
+            pageIndex: 1, // 页码
+            map: map, // 展现结果的地图实例
+            panel: 'panel', // 结果列表将在此容器中进行展示。
+            autoFitView: true // 是否自动调整地图视野使绘制的 Marker点都处于视口的可见范围
+        });  //构造地点查询类
+        placeSearch.searchNearBy('', [lng, lat], 1000, function (status, result) {
+            // 搜索成功时，result即是对应的匹配数据
+            console.log(result);
+            data.value.push(createMessage('chatbot', `已为您找到共${result.poiList.count}个相关地点`));
+        })
+        placeSearch.on('markerClick', function (e) {
+            console.log(e);
+            getPoiByMarker(e);
+        });
+        placeSearch.on('listElementClick', function (e) {
+            console.log(e);
+            getPoiByList(e);
+        });
+    });
 }
 
 function getPoiByMarker(e) {
     let msg = `您在地图上点击了${e.data.name}，该地点位于${e.data.cityname}${e.data.adname}${e.data.address}`;
     data.value.push(createMessage('chatbot', msg));
-
 }
 function getPoiByList(e) {
     let msg = `您在搜索结果中点击了${e.data.name}，该地点位于${e.data.cityname}${e.data.adname}${e.data.address}`;
