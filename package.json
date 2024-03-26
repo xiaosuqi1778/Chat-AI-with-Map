@@ -14,8 +14,10 @@
     "axios": "^1.6.7",
     "express": "^4.18.2",
     "moment": "^2.30.1",
+    "vant": "^4.8.7",
     "vue": "^3.3.4",
-    "vuex": "^4.0.2"
+    "vue-router": "^4.3.0",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.4.0",

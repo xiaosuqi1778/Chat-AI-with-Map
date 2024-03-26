@@ -1,18 +1,11 @@
 <script setup>
-import MapContainer from './component/MapContainer.vue';
-/* import ChatUI from './component/ChatUI.vue';
-import ChatAI from './component/ChatAI.vue';
- */</script>
+</script>
 
 
 <template>
   <div>
-    <MapContainer/>
-    <!-- <div class="spacer"></div> -->
-    <!-- <ChatUI /> -->
-    <!-- <ChatAI /> -->
+    <router-view />
   </div>
-
 </template>
 
 
@@ -24,6 +17,4 @@ body {
   width: 100%;
   position: absolute;
 }
-
-
 </style>

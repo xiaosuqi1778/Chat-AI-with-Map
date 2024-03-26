@@ -2,21 +2,16 @@
 > 这是一款使用团队自定义推荐模型，利用大模型和地图进行交互的地图可视化系统
 
 ## 示例
-- 第三版展示
-> 1. 页面初始化  
-> ![](./documents/2024-03-07-18-27-04.png)
-> 2. 关键字搜索  
-> ![](./documents/2024-03-07-18-27-56.png)
-> 3. 聊天关键词匹配搜索  
-> ![](./documents/2024-03-07-18-36-52.png)
-> 4. 地图点击事件  
-> ![](./documents/2024-03-07-18-37-57.png)
-
-- 第二版展示
-> ![聊天内容POI关键词匹配](./documents/2024-03-05-17-56-55.png "将聊天内容与POI关键词匹配并搜索]")
-> 
-- 第一版展示
-> ![首页](./documents/image.png "首页")
+> 历史版本：[历史版本](/edition.md)  
+> 第四版：  
+> 1. 登录与注册  
+> ![](./documents/2024-03-26-21-25-34.png)  
+> ![](./documents/2024-03-26-21-26-02.png)  
+> 2. 使用
+> ![](./documents/2024-03-26-21-26-35.png)
+> ![](./documents/2024-03-26-21-26-54.png)
+> ![](./documents/2024-03-26-21-27-30.png)
+> ![](./documents/2024-03-26-21-27-41.png)
 
 ## 准备
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).  
@@ -26,7 +21,13 @@
 
 ## 开始使用
 ### 填写key
-[此处填写](./src/component/MapContainer.vue) 
+[此处填写](./src/config/key.js) 
+```js
+export const robotUrl = ;
+export const robotKey = ;
+export const amapKey = ;
+export const amapSecurityCode = ;
+```
 >- 高德地图 JS API  
 >- 【新】天行机器人 API  
 首先[申请](https://www.tianapi.com/)，搜索`天行机器人`，注册会员（实名认证可选），在`axios.get()`设置参数`key`
@@ -43,6 +44,8 @@ npm i @chat-ui/vue3
 npm i @amap/map-jsapi-loader --save
 npm install axios
 npm install @layui/layui-vue --save
+npm install vue-router
+npm install vuex --save
 ```
 3. Compile and Hot-Reload for Development
 ```sh
@@ -54,6 +57,12 @@ npm run build
 ```
 
 ## 更新日志
+- `2024.3.26`:  
+> 1. 新增用户注册、登录功能；其他功能：聊天记录缓存与恢复、地点收藏、步行路径导航等。
+> 2. 删除自动匹配关键词功能；
+> 3. 优化UI
+> 4. 引入vue-router和vuex，修改文件架构，优化代码
+> 5. 已知问题：地点收藏存在bug
 - `2024.03.08`:
 > 1. 新增地图右键菜单功能和在周边搜索功能
 > 2. 发现了一些玄学bug，将`2024.03.06`优化的代码进行部分还原
