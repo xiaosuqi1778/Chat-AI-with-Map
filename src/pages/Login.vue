@@ -138,7 +138,7 @@ body {
     left: 36.5%;
     width: 400px;
     height: 300px;
-    background: rgba(223, 219, 219, 0.5);
+    background: rgba(223, 219, 219, 0.6);
     display: flex;
     border-radius: 5px;
     justify-content: center;

@@ -13,10 +13,12 @@ import { getPoiByMarker, getPoiByList,addToFavorateList } from '../services/MapS
 
 import { currentChatbotReply, historyChatbotReply } from "../store/ChatStore";
 
-
+import { map } from "../services/MapServices";
+import { makeStartMarker, makeEndMarker } from '../services/MapServices';
+import { formulateCount, startMarkerPosition, endMarkerPosition } from "../services/MapServices";
 // import { map } from "../store/MapStore";
 
-let map = null;
+// let map = null;
 let contextMenu = null;
 let contextMenuPositon = null;
 const wuhanCenter = [114.304569, 30.593354];
@@ -45,7 +47,7 @@ onMounted(() => {
         // 需要使用的的插件列表，如比例尺'AMap.Scale'等
     })
         .then((AMap) => {
-            map = new AMap.Map("container", {
+            map.value = new AMap.Map("container", {
                 // 设置地图的显示样式：https://lbs.amap.com/api/javascript-api-v2/guide/map/map-style
                 mapStyle: 'amap://styles/fresh',
                 viewMode: "2D", // 是否为3D地图模式
@@ -64,11 +66,11 @@ onMounted(() => {
                 makeEndMarker(contextMenuPositon.lng, contextMenuPositon.lat);
             }, 2);
             contextMenu.addItem("回到武汉", () => {
-                map.setZoomAndCenter(12, wuhanCenter);
+                map.value.setZoomAndCenter(12, wuhanCenter);
             }, 3);
             //地图绑定鼠标右击事件——弹出右键菜单
-            map.on('rightclick', (e) => {
-                contextMenu.open(map, e.lnglat);
+            map.value.on('rightclick', (e) => {
+                contextMenu.open(map.value, e.lnglat);
                 contextMenuPositon = e.lnglat;
             });
 
@@ -80,9 +82,9 @@ onMounted(() => {
                     offset: [8, 8],
                     position: 'RT'
                 });
-                map.addControl(toolbar);
+                map.value.addControl(toolbar);
                 let scale = new AMap.Scale();
-                map.addControl(scale);
+                map.value.addControl(scale);
 
                 // 地图定位
                 let geolocation = new AMap.Geolocation({
@@ -92,7 +94,7 @@ onMounted(() => {
                     offset: [8, 16], //定位按钮与设置的停靠位置的偏移量，默认：[10, 20]
                     zoomToAccuracy: true,   //定位成功后是否自动调整地图视野到定位点
                 });
-                map.addControl(geolocation);
+                map.value.addControl(geolocation);
                 geolocation.getCurrentPosition(function (status, result) {
                     if (status == 'complete') {
                         onComplete(result);
@@ -122,56 +124,12 @@ onMounted(() => {
 onUnmounted(() => {
     //解绑地图的点击事件
     //销毁地图，并清空地图容器
-    map?.destroy();
-    /* //地图对象赋值为null
-    map = null
-    //清除地图容器的 DOM 元素
-    document.getElementById("container").remove(); //"container" 为指定 DOM 元素的id */
+    map.value?.destroy();
 });
 
 
-let startMarker = null, endMarker = null;
-const startMarkerPosition = ref({}), endMarkerPosition = ref({});
-const formulateCount = ref([false, false]);
 
-let walking = null;
-watch(
-    () => formulateCount.value,
-    (newValue, oldValue) => {
-        if (formulateCount.value[0] && formulateCount.value[1]) {
-            console.log("开始规划路线");
-            startMarker.remove();
-            endMarker.remove();
-            if (walking) walking.clear();
-            AMap.plugin("AMap.Walking", () => {
-                walking = new AMap.Walking({
-                    map: map,
-                    // panel: 'panel'
-                });
-                let start = [startMarkerPosition.value.lng, startMarkerPosition.value.lat];
-                let end = [endMarkerPosition.value.lng, endMarkerPosition.value.lat];
-                walking.search(start, end, function (status, result) {
-                    // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
-                    if (status === 'complete') {
-                        console.log(result);
-                        layer.msg("路线规划成功", { time: 1000, icon: 1 });
-                        /* let msg;
-                        for(let i = 0; i < result.routes[0].steps.length; i++) {
-                            msg += result.routes[0].steps[i].instruction + '\n';
-                        }
-                        data.value.push(createMessage('chatbot', msg)); */
-                    } else {
-                        layer.msg("路线规划失败", { time: 1000, icon: 2 });
-                    }
-                });
-            });
-            formulateCount.value = [false, false];
-        }
-    },
-    {
-        deep: true
-    }
-);
+
 watch(
     () => currentChatbotReply.value,
     (newValue, oldValue) => {
@@ -205,7 +163,7 @@ function searchPoiByKeyword(searchKeyword,source,searchType=searchDefaultType) {
             city: '武汉',
             citylimit: true,  //是否强制限制在设置的城市内搜索
             type: searchType, // 兴趣点类别
-            map: map,
+            map: map.value,
             pageSize: 5, // 单页显示结果条数
             pageIndex: 1, // 页码
             panel: 'panel', // 结果列表将在此容器中进行展示。
@@ -254,7 +212,7 @@ function searchPoiNearBy(lat, lng,type=searchDefaultType,distance=1000) {
         placeSearch = new AMap.PlaceSearch({
             city: '武汉',
             citylimit: true,  //是否强制限制在设置的城市内搜索
-            map: map,
+            map: map.value,
             type: type,
             pageSize: 5, // 单页显示结果条数
             pageIndex: 1, // 页码
@@ -312,28 +270,7 @@ function listElementClick(e) {
         }
     );
 }
-function makeStartMarker(lng, lat) {
-    if (startMarker) startMarker.remove();
-    startMarkerPosition.value = { lng: lng, lat: lat };
-    startMarker = new AMap.Marker({
-        position: [lng, lat],
-        icon: new AMap.Icon(startIconOptions),
-        offset: new AMap.Pixel(-13, -30)
-    });
-    formulateCount.value[0] = true;
-    startMarker.setMap(map);
-}
-function makeEndMarker(lng, lat) {
-    if (endMarker) endMarker.remove();
-    endMarkerPosition.value = { lng: lng, lat: lat };
-    endMarker = new AMap.Marker({
-        position: [lng, lat],
-        icon: new AMap.Icon(endIconOptions),
-        offset: new AMap.Pixel(-13, -30)
-    });
-    formulateCount.value[1] = true;
-    endMarker.setMap(map);
-}
+
 </script>
 
 <template>
@@ -356,7 +293,7 @@ function makeEndMarker(lng, lat) {
     position: absolute;
     top: auto;
     left: 0;
-    width: 71%;
+    width: 70.5%;
     height: calc(100% - 61px);
     /* box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.25); */
 }
@@ -380,8 +317,8 @@ function makeEndMarker(lng, lat) {
 
 #myPageTop {
     position: absolute;
-    top: auto+10px;
-    left: 10px;
+    top: auto;
+    /* left: 10px; */
     width: 310px;
     font-family: "Microsoft Yahei", "微软雅黑", "Pinghei";
     font-size: 16px;

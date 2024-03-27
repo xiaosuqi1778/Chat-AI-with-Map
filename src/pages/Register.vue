@@ -19,18 +19,28 @@ const model = reactive({
 });
 
 const registerBtn = async () => {
-    const valid = await this.$refs.registerForm.validate();
-    if (valid) {
+    // const valid = await this.$refs.registerForm.validate();
+    // if (valid) {
         if (password.value === ispassword.value) {
             const obj = { name: username.value, password: password.value };
             userinfoList.value.push(obj);
             localStorage.setItem('userinfo', JSON.stringify(userinfoList.value));
-            toast.success('恭喜你注册成功!');
-            router.push({ name: 'login' });
+            // toast.success('恭喜你注册成功!');
+            layer.msg('恭喜你注册成功!', {
+                icon: 1,
+                time: 1000,
+            });
+            setTimeout(() => {
+                router.push({ name: 'Login' });
+            }, 1000);
         } else {
-            toast.fail('两次密码不一致!');
+            // toast.fail('两次密码不一致!');
+            layer.msg('两次密码不一致!', {
+                icon: 2,
+                time: 1000,
+            });
         }
-    }
+    // }
 };
 const toLogin = () => {
     router.push({ name: 'Login' });
@@ -42,7 +52,7 @@ const toLogin = () => {
         <div class="content-box">
             <div class="content-login">
                 <div class="content-login-info">
-                    <div class="content-title-register">欢迎使用 Chat AI with Map</div>
+                    <div class="content-title-register">欢迎注册 Chat AI with Map</div>
                     <lay-form :model="model" ref="registerForm" class="layui-form">
                         <lay-form-item label="用户名" label-width="80" prop="username">
                             <lay-input v-model="model.username" placeholder="请输入用户名"></lay-input>
@@ -55,7 +65,7 @@ const toLogin = () => {
                         </lay-form-item>
                         <lay-form-item style="margin: 26px;">
                             <lay-button type="primary" fluid @keyup.enter.native="registerBtn"
-                                @click="registerBtn">注册</lay-button>
+                                @click="registerBtn()">注册</lay-button>
                         </lay-form-item>
                         <div class="content-bottom">
                             <div @click="toLogin()">已有账号？登录</div>
@@ -96,7 +106,7 @@ const toLogin = () => {
 .content-login {
     width: 400px;
     height: 350px;
-    background: rgba(223, 219, 219, 0.5);
+    background: rgba(223, 219, 219, 0.6);
     display: flex;
     border-radius: 5px;
     justify-content: center;

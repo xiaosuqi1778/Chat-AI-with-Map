@@ -3,15 +3,16 @@
 
 ## 示例
 > 历史版本：[历史版本](/edition.md)  
-> 第四版：  
-> 1. 登录与注册  
-> ![](./documents/2024-03-26-21-25-34.png)  
-> ![](./documents/2024-03-26-21-26-02.png)  
-> 2. 使用
-> ![](./documents/2024-03-26-21-26-35.png)
-> ![](./documents/2024-03-26-21-26-54.png)
-> ![](./documents/2024-03-26-21-27-30.png)
-> ![](./documents/2024-03-26-21-27-41.png)
+
+第四版：  
+1. 登录与注册  
+![](./documents/2024-03-26-21-25-34.png)  
+![](./documents/2024-03-26-21-26-02.png)  
+2. 使用
+![](./documents/2024-03-26-21-26-35.png)
+![](./documents/2024-03-26-21-26-54.png)
+![](./documents/2024-03-26-21-27-30.png)
+![](./documents/2024-03-26-21-27-41.png)
 
 ## 准备
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).  
@@ -62,7 +63,7 @@ npm run build
 > 2. 删除自动匹配关键词功能；
 > 3. 优化UI
 > 4. 引入vue-router和vuex，修改文件架构，优化代码
-> 5. 已知问题：地点收藏存在bug
+> 5. 已知问题：地点收藏存在bug（注：已在3/27修正）
 - `2024.03.08`:
 > 1. 新增地图右键菜单功能和在周边搜索功能
 > 2. 发现了一些玄学bug，将`2024.03.06`优化的代码进行部分还原

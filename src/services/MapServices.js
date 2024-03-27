@@ -1,5 +1,5 @@
 import { createStore } from "vuex";
-import { ref } from "vue";
+import { ref,watch } from "vue";
 import { layer } from "@layui/layui-vue";
 import AMapLoader from "@amap/amap-jsapi-loader";// 引入 JS API Loader
 
@@ -9,7 +9,7 @@ import { startIconOptions, endIconOptions } from "../store/MapStore";
 
 import { favoratePoiList } from "../store/MapStore";
 
-
+export const map = ref(null);
 
 // 解析定位结果
 export function onComplete(data) {
@@ -37,9 +37,48 @@ export function onError(data) {
     })
 }
 
-let startMarker = null, endMarker = null;
-const startMarkerPosition = ref({}), endMarkerPosition = ref({});
-const formulateCount = ref([false, false]);
+export let startMarker = null, endMarker = null;
+export const startMarkerPosition = ref({}), endMarkerPosition = ref({});
+export const formulateCount = ref([false, false]);
+
+let walking = null;
+watch(
+    () => formulateCount.value,
+    (newValue, oldValue) => {
+        if (formulateCount.value[0] && formulateCount.value[1]) {
+            console.log("开始规划路线");
+            startMarker.remove();
+            endMarker.remove();
+            if (walking) walking.clear();
+            AMap.plugin("AMap.Walking", () => {
+                walking = new AMap.Walking({
+                    map: map.value,
+                    // panel: 'panel'
+                });
+                let start = [startMarkerPosition.value.lng, startMarkerPosition.value.lat];
+                let end = [endMarkerPosition.value.lng, endMarkerPosition.value.lat];
+                walking.search(start, end, function (status, result) {
+                    // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
+                    if (status === 'complete') {
+                        console.log(result);
+                        layer.msg("路线规划成功", { time: 1000, icon: 1 });
+                        /* let msg;
+                        for(let i = 0; i < result.routes[0].steps.length; i++) {
+                            msg += result.routes[0].steps[i].instruction + '\n';
+                        }
+                        data.value.push(createMessage('chatbot', msg)); */
+                    } else {
+                        layer.msg("路线规划失败", { time: 1000, icon: 2 });
+                    }
+                });
+            });
+            formulateCount.value = [false, false];
+        }
+    },
+    {
+        deep: true
+    }
+);
 
 /* export function makeStartMarker(lng, lat) {
     if (startMarker) startMarker.remove();
@@ -187,4 +226,27 @@ export function getPoiByMarker(e) {
 export function getPoiByList(e) {
     let msg = `您在搜索结果中点击了${e.data.name}，该地点位于${e.data.cityname}${e.data.adname}${e.data.address}`;
     chatData.value.push(createMessage('chatbot', msg));
+}
+
+export function makeStartMarker(lng, lat) {
+    if (startMarker) startMarker.remove();
+    startMarkerPosition.value = { lng: lng, lat: lat };
+    startMarker = new AMap.Marker({
+        position: [lng, lat],
+        icon: new AMap.Icon(startIconOptions),
+        offset: new AMap.Pixel(-13, -30)
+    });
+    formulateCount.value[0] = true;
+    startMarker.setMap(map.value);
+}
+export function makeEndMarker(lng, lat) {
+    if (endMarker) endMarker.remove();
+    endMarkerPosition.value = { lng: lng, lat: lat };
+    endMarker = new AMap.Marker({
+        position: [lng, lat],
+        icon: new AMap.Icon(endIconOptions),
+        offset: new AMap.Pixel(-13, -30)
+    });
+    formulateCount.value[1] = true;
+    endMarker.setMap(map.value);
 }
