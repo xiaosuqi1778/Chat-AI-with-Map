@@ -7,6 +7,9 @@ import { handleSendEvent } from '../services/ChatService';
 
 const instance = getCurrentInstance();
 
+/**
+ * 初始化聊天组件
+ */
 onMounted(() => {
     instance.refs.chatComponent.chatOpen = true;
 });

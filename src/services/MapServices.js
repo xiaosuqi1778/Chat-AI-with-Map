@@ -1,5 +1,5 @@
 import { createStore } from "vuex";
-import { ref,watch } from "vue";
+import { ref, watch } from "vue";
 import { layer } from "@layui/layui-vue";
 import AMapLoader from "@amap/amap-jsapi-loader";// 引入 JS API Loader
 
@@ -12,6 +12,12 @@ import { favoratePoiList } from "../store/MapStore";
 export const map = ref(null);
 
 // 解析定位结果
+/**
+ * @function onComplete
+ * @description 定位成功后的操作
+ * @param {Object} data 定位结果
+ * @returns {void}
+ */
 export function onComplete(data) {
     console.log('定位成功');
     let str = [];
@@ -28,6 +34,11 @@ export function onComplete(data) {
     })
 }
 // 解析定位错误信息
+/**
+ * @function onError
+ * @description 定位失败后的操作
+ * @param {Object} data 定位结果
+ */
 export function onError(data) {
     console.log('定位失败');
     console.log(`失败原因排查信息: ${data.message} 浏览器返回信息: ${data.originMessage}`);
@@ -37,11 +48,16 @@ export function onError(data) {
     })
 }
 
+// 路线规划的起点和终点
 export let startMarker = null, endMarker = null;
 export const startMarkerPosition = ref({}), endMarkerPosition = ref({});
 export const formulateCount = ref([false, false]);
 
 let walking = null;
+/**
+ * @description 监听起点和终点是否都已经设置，如果都设置了，则开始规划路线
+ * @param {Array} newValue ${formulateCount.value}的新值
+ */
 watch(
     () => formulateCount.value,
     (newValue, oldValue) => {
@@ -102,6 +118,8 @@ export function makeEndMarker(lng, lat) {
     formulateCount.value[1] = true;
     endMarker.setMap(map);
 } */
+
+// 此方法已移动至 MapContainer.vue
 function listElementClick(e) {
     layer.confirm(`将${e.data.name}设置为？`,
         {
@@ -140,7 +158,12 @@ function listElementClick(e) {
 
 // 按ID查询POI
 let placeSearch = null;
-export function searchPoiById(id,map) {
+/**
+ * 已移动至 MapContainer.vue
+ * @param {*} id 
+ * @param {*} map 
+ */
+export function searchPoiById(id, map) {
     if (placeSearch) {
         placeSearch.clear();
     }
@@ -187,6 +210,14 @@ export function searchPoiById(id,map) {
         );
     });
 }
+
+/**
+ * @function addToFavorateList
+ * @description 将poi对象存入收藏列表
+ * @param {Object} poi poi对象 
+ * @returns 
+ * @todo 与后端交互，将poi对象存入数据库
+ */
 export function addToFavorateList(poi) {
     //检查id是否重复
     let isExist = favoratePoiList.value.some((item) => {
@@ -218,16 +249,34 @@ export function addToFavorateList(poi) {
     })
 }
 
+/**
+ * @function getPoiByMarker
+ * @description 通过点击地图上的marker获取poi信息,并将信息显示在聊天框中
+ * @param {Object} e 鼠标点击事件对象
+ * @todo 获取poi信息后，反馈给GPT，生成评价
+ */
 export function getPoiByMarker(e) {
     let msg = `您在地图上点击了${e.data.name}，该地点位于${e.data.cityname}${e.data.adname}${e.data.address}`;
     chatData.value.push(createMessage('chatbot', msg));
-
 }
+
+/**
+ * @function getPoiByList
+ * @description 通过点击搜索结果列表获取poi信息,并将信息显示在聊天框中
+ * @param {Object} e 鼠标点击事件对象
+ * @todo 获取poi信息后，反馈给GPT，生成评价
+ */
 export function getPoiByList(e) {
     let msg = `您在搜索结果中点击了${e.data.name}，该地点位于${e.data.cityname}${e.data.adname}${e.data.address}`;
     chatData.value.push(createMessage('chatbot', msg));
 }
 
+/**
+ * @function makeStartMarker
+ * @description 在地图上添加起点标记
+ * @param {Number} lng 经度
+ * @param {Number} lat 纬度
+ */
 export function makeStartMarker(lng, lat) {
     if (startMarker) startMarker.remove();
     startMarkerPosition.value = { lng: lng, lat: lat };
@@ -239,6 +288,13 @@ export function makeStartMarker(lng, lat) {
     formulateCount.value[0] = true;
     startMarker.setMap(map.value);
 }
+
+/**
+ * @function makeEndMarker
+ * @description 在地图上添加终点标记
+ * @param {Number} lng 经度
+ * @param {Number} lat 纬度
+ */
 export function makeEndMarker(lng, lat) {
     if (endMarker) endMarker.remove();
     endMarkerPosition.value = { lng: lng, lat: lat };

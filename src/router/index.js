@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../pages/Login.vue';
 import Register from '../pages/Register.vue';
 import Home from '../pages/Home.vue';
+import PersonalCenter from '../pages/PersonalCenter.vue';
 
 // 定义路由
 const routes = [
@@ -23,7 +24,12 @@ const routes = [
         path: '/home',
         name: 'Home',
         component: Home
-    }
+    },
+    {
+        path: '/person',
+        name: 'Person',
+        component: PersonalCenter
+    },
 ]
 
 // 创建路由实例

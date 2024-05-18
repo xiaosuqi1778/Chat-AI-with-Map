@@ -1,66 +1,84 @@
 <script setup>
-import { ref,reactive } from 'vue';
+import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { layer } from '@layui/layui-vue';
+import { layerMessageType,showMessage } from '../services/LayMessageServices';
+
 
 const router = useRouter();
-// const toast = useToast();
 
 const username = ref('');
 const password = ref('');
 const loginData = ref([]);
 
 const model = reactive({
-  username: '',
-  password: ''
+    username: '',
+    password: ''
 });
+const testUser = {
+    name: 'admin123',
+    password: 'admin123'
+};
 
+/**
+ * @function loginBtn
+ * @description 登录按钮
+ * @returns void
+ * @todo 与后端交互，实现用户登录验证逻辑
+ */
 const loginBtn = async () => {
-    router.push({ name: 'Home' });
-    /* if (localStorage.getItem('userinfo') === null) {
-        layer.msg({
-            content: '请先注册!',
-            time: 2
-        });
+    if (localStorage.getItem('userinfo') === null) {
+        showMessage('用户名不存在，请先注册！','error');
     } else {
         loginData.value = JSON.parse(localStorage.getItem('userinfo'));
         if (loginData.value) {
             loginData.value.forEach((item) => {
-                if (username.value === item.name && password.value === item.password) {
-                    layer.msg({
-                        content: '登录成功!',
-                        time: 2
-                    });
-                    router.push({ name: 'Home' });
+                if (model.username === item.name && model.password === item.password) {
+                    layer.msg('登录成功!',{time: 2000});
+                    router.push({ name: 'Home' });  // 将跳转操作放在这里
+                    return;
                 }
-                if (username.value === item.name && password.value !== item.password) {
-                    layer.msg({
-                        content: '密码错误!',
-                        time: 2
-                    });
+                if (model.username !== item.name) {
+                    // layer.msg('用户名错误!', { time: 200 });
+                    showMessage('用户名错误!','error');
+                    return;
                 }
-                if (username.value !== item.name && password.value === item.password) {
-                    layer.msg({
-                        content: '用户名错误!',
-                        time: 2
-                    });
+                if (model.password !== item.password) {
+                    // layer.msg('密码错误!',{time: 200});
+                    showMessage('密码错误!', 'error');
+                    return;
                 }
             });
+        } else {
+            showMessage('用户名不存在，请先注册！','error');
         }
-    } */
-
+    }
+};
+const visitorLogin = () => {
+    // layer.msg('登录成功!',{time: 2000});
+    showMessage('登录成功!','success',2000);
+    router.push({ name: 'Home' });
 };
 
-const toregister = () => {
+/**
+ * @function toRegisterView
+ * @description 跳转到注册页面
+ */
+const toRegisterView = () => {
     router.push({ name: 'Register' });
 };
 
-const topassword = () => {
-    layer.msg({
-        content: '请联系管理员!',
-        time: 2
-    });
+/**
+ * @function toForgetPasswordView
+ * @description 跳转到忘记密码页面
+ * @todo 增加忘记密码页面
+ */
+const toForgetPasswordView = () => {
+    /* layer.msg("请联系管理员修改密码", {
+        time: 200
+    }); */
+    showMessage('请联系管理员修改密码','detail');
 };
 </script>
 
@@ -70,21 +88,22 @@ const topassword = () => {
             <div class="content-login">
                 <div class="content-login-info">
                     <div class="content-title">欢迎登录 ChatAI with Map</div>
-                    <lay-form :model="model" ref="loginForm" class="layui-form" >
-                        <lay-form-item label="用户名"  label-width="60" prop="username" >
+                    <lay-form :model="model" ref="loginForm" class="layui-form">
+                        <lay-form-item label="用户名" label-width="60" prop="username">
                             <lay-input v-model="model.username" placeholder="请输入用户名"></lay-input>
                         </lay-form-item>
                         <lay-form-item label="密码" label-width="60" prop="password">
                             <lay-input v-model="model.password" type="password" placeholder="请输入密码"></lay-input>
                         </lay-form-item>
                         <lay-form-item style="margin: 26px;">
-                            <lay-button type="default"  @click="loginBtn()" style="width:120px;background-color: aliceblue;">游客访问</lay-button>
-                            <lay-button type="primary"  
-                                @keyup.enter.native="loginBtn" @click="loginBtn()" style="width: 120px;float: right;">登录</lay-button>    
+                            <lay-button type="default" @click="visitorLogin()"
+                                style="width:120px;background-color: aliceblue;">游客访问</lay-button>
+                            <lay-button type="primary" @keyup.enter.native="loginBtn" @click="loginBtn()"
+                                style="width: 120px;float: right;">登录</lay-button>
                         </lay-form-item>
                         <div class="content-bottom">
-                            <div @click="topassword()">忘记密码？</div>
-                            <div @click="toregister()">注册</div>
+                            <div @click="toForgetPasswordView()">忘记密码？</div>
+                            <div @click="toRegisterView()">注册</div>
                         </div>
                     </lay-form>
                 </div>

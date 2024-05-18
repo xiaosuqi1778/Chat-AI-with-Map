@@ -1,5 +1,6 @@
 <script setup>
 import { ref, reactive, defineExpose } from 'vue';
+import { useRouter } from 'vue-router';
 import { layer } from '@layui/layui-vue';
 
 import { chatData } from '../store/ChatStore';
@@ -11,37 +12,40 @@ import { map } from '../services/MapServices';
 
 import { makeStartMarker, makeEndMarker } from '../services/MapServices';
 import { formulateCount, startMarkerPosition, endMarkerPosition } from "../services/MapServices";
+
+import { layerMessageType, showMessage } from '../services/LayMessageServices';
+
+const router = useRouter();
+
 // 浏览器缓存相关
+/**
+ * @function storage
+ * @description 存储数据，包括收藏地点和聊天记录
+ * @param type 
+ */
 function storage(type) {
     if (type === 'favoratePoiList') {
         localStorage.setItem('favoratePoiList', JSON.stringify(favoratePoiList.value));
-        layer.msg('收藏地点保存成功', {
-            icon: 1,
-            time: 1000,
-        });
+        showMessage('收藏地点保存成功', 'success', 1000);
     }
     if (type === 'chatHistory') {
         localStorage.setItem('chatHistory', JSON.stringify(chatData.value));
-        layer.msg('聊天记录保存成功', {
-            icon: 1,
-            time: 1000,
-        });
+        showMessage('聊天记录保存成功', 'success', 1000);
     }
 }
+/**
+ * @function reload
+ * @description 恢复数据，包括收藏地点和聊天记录
+ * @param type 恢复类型
+ */
 function reload(type) {
     if (type === 'favoratePoiList') {
         let data = JSON.parse(localStorage.getItem('favoratePoiList'));
         if (data) {
             favoratePoiList.value = data;
-            layer.msg('收藏地点恢复成功', {
-                icon: 1,
-                time: 1000,
-            });
+            showMessage('收藏地点恢复成功', 'success', 1000);
         } else {
-            layer.msg('暂无收藏地点', {
-                icon: 7,
-                time: 1000,
-            });
+            showMessage('暂无收藏地点', 'warning', 1000);
         }
     }
     if (type === 'chatHistory') {
@@ -55,36 +59,33 @@ function reload(type) {
                         text: '追加至现聊天', callback: (id) => {
                             // 在chatData前面添加
                             chatData.value = data.concat(chatData.value);
-                            layer.msg('聊天记录追加成功', {
-                                icon: 1,
-                                time: 1000,
-                            });
+                            showMessage('聊天记录追加成功', 'success', 1000);
                             layer.close(id);
                         }
                     },
                     {
                         text: '覆盖现有聊天', callback: (id) => {
                             chatData.value = data;
-                            layer.msg('聊天记录恢复成功', {
-                                icon: 1,
-                                time: 1000,
-                            });
+                            showMessage('聊天记录恢复成功', 'success', 1000);
                             layer.close(id);
                         }
                     }
                 ]
             });
         } else {
-            layer.msg('暂无聊天记录', {
-                icon: 7,
-                time: 1000,
-            });
+            showMessage('暂无聊天记录', 'warning', 1000);
         }
     }
 }
 
 
 let placeSearch = null;
+/**
+ * @function searchPoiById
+ * @description 根据id搜索地点
+ * @param id 地点id
+ * @param map 地图实例
+ */
 function searchPoiById(id,map) {
     if (placeSearch) {
         placeSearch.clear();
@@ -112,12 +113,7 @@ function searchPoiById(id,map) {
                         text: '确定', callback: (id) => {
                             makeEndMarker(res.poiList.pois[0].location.lng, res.poiList.pois[0].location.lat);
                             if (!formulateCount.value[0]) {
-                                layer.msg('请先设置出行起点', {
-                                    icon: 7,
-                                    time: 1500,
-                                    shade: true,
-                                    shadeOpacity: 0.25
-                                })
+                                showMessage('请先设置出行起点', 'warning', 1500, true, 0.25);
                             }
                             layer.close(id);
                         }
@@ -130,6 +126,30 @@ function searchPoiById(id,map) {
                 ]
             }
         );
+    });
+}
+
+const directToCenter = () => {
+    router.push({ name: 'Person' });
+}
+const returnToLogin = () => {
+    router.push({ name: 'Login' });
+}
+const helpInfo = () => {
+    layer.confirm("<h3>欢迎使用 Chat AI whih Map</h3>" +
+        "你可以做:" +
+        "<ul>" +
+        "<li>1.使用搜索框搜索感兴趣的地点，并告诉机器人</li>"+
+        "<li>2.在地图中选择某一地点开始探索周边</li>" +
+        "<li>3.直接告诉机器人自己的感受，让机器人为你推荐</li>" +
+        "</ul>" +
+        "还有更多功能等你探索", {
+        isHtmlFragment: true,
+        title: '使用说明',
+        titleStyle: {
+            color: '#000',
+            fontSize: '20px'
+        },
     });
 }
 </script>
@@ -178,14 +198,23 @@ function searchPoiById(id,map) {
                 <lay-icon type="layui-icon-username" style="margin-right: 2px;"></lay-icon>
                 个人中心
             </template>
-            <lay-menu-item>账户</lay-menu-item>
-            <lay-menu-item>
+            <lay-menu-item @click="directToCenter">
+                <lay-icon type="layui-icon-username" style="margin-right: 2px;"></lay-icon>
+                账户
+            </lay-menu-item>
+            <lay-menu-item @click="helpInfo">
                 <lay-icon type="layui-icon-help-circle" style="margin-right: 2px;"></lay-icon>
                 帮助
             </lay-menu-item>
-            <lay-menu-item>
+            <lay-menu-item @click="returnToLogin">
                 <lay-icon type="layui-icon-logout" style="margin-right: 2px;"></lay-icon>
                 退出登录
+            </lay-menu-item>
+            <lay-menu-item>
+                <a href="https://github.com/xiaosuqi1778/Chat-AI-with-Map" target="_blank">
+                    <lay-icon type="layui-icon-github" style="margin-right: 2px;"></lay-icon>
+                    GitHub
+                </a>
             </lay-menu-item>
         </lay-sub-menu>
     </lay-menu>

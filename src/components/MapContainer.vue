@@ -3,33 +3,37 @@ import { ref, watch, onMounted, onUnmounted, computed, nextTick } from "vue";
 import AMapLoader from "@amap/amap-jsapi-loader";// 引入 JS API Loader
 import { layer } from '@layui/layui-vue';
 
-import { startIconOptions, endIconOptions,searchDefaultType } from "../store/MapStore";
+import { startIconOptions, endIconOptions, searchDefaultType } from "../store/MapStore";
 import { amapKey, amapSecurityCode } from "../config/key";
 
 import { createMessage } from "../services/ChatService";
 import { chatData } from "../store/ChatStore";
 import { onComplete, onError } from '../services/MapServices';
-import { getPoiByMarker, getPoiByList,addToFavorateList } from '../services/MapServices';
+import { getPoiByMarker, getPoiByList, addToFavorateList } from '../services/MapServices';
 
 import { currentChatbotReply, historyChatbotReply } from "../store/ChatStore";
 
 import { map } from "../services/MapServices";
 import { makeStartMarker, makeEndMarker } from '../services/MapServices';
 import { formulateCount, startMarkerPosition, endMarkerPosition } from "../services/MapServices";
+import { showMessage } from "../services/LayMessageServices";
 // import { map } from "../store/MapStore";
 
-// let map = null;
+// 右键菜单
 let contextMenu = null;
+// 右键菜单位置
 let contextMenuPositon = null;
+// 武汉市中心坐标
 const wuhanCenter = [114.304569, 30.593354];
 
-
+// 搜索关键字
 const searchKeyword = ref('');
+// 需要的高德地图插件
 const amapPlugin = ref(['AMap.ToolBar', 'AMap.PlaceSearch', 'AMap.Scale', 'AMap.AutoComplete', 'AMap.Geolocation']);
+// 当前位置
 let currentLocation = ref({});
 
 onMounted(() => {
-    // instance.refs.chatComponent.chatOpen = true;
     layer.notify({
         title: "欢迎使用 Chat AI with Map",
         content: "Just enjoy it!",//欢迎内容
@@ -55,25 +59,7 @@ onMounted(() => {
                 center: wuhanCenter, // 初始化地图中心点位置：武汉市
             });
 
-            contextMenu = new AMap.ContextMenu();
-            contextMenu.addItem("在此点周边搜索", (e) => {
-                searchPoiNearBy(contextMenuPositon.lat, contextMenuPositon.lng);
-            }, 0);
-            contextMenu.addItem("设为出行起点", (e) => {
-                makeStartMarker(contextMenuPositon.lng, contextMenuPositon.lat);
-            }, 1);
-            contextMenu.addItem("设为出行终点", (e) => {
-                makeEndMarker(contextMenuPositon.lng, contextMenuPositon.lat);
-            }, 2);
-            contextMenu.addItem("回到武汉", () => {
-                map.value.setZoomAndCenter(12, wuhanCenter);
-            }, 3);
-            //地图绑定鼠标右击事件——弹出右键菜单
-            map.value.on('rightclick', (e) => {
-                contextMenu.open(map.value, e.lnglat);
-                contextMenuPositon = e.lnglat;
-            });
-
+            setContextMenu();// 设置右键菜单
 
             // 异步加载插件
             AMap.plugin(amapPlugin.value, () => {
@@ -96,7 +82,7 @@ onMounted(() => {
                 });
                 map.value.addControl(geolocation);
                 geolocation.getCurrentPosition(function (status, result) {
-                    if (status == 'complete') {
+                    if (status === 'complete') {
                         onComplete(result);
                         currentLocation.value = result.position;
                     } else {
@@ -127,9 +113,39 @@ onUnmounted(() => {
     map.value?.destroy();
 });
 
+/**
+ * @author ${xusuqi}
+ * @version 1.0
+ * @description 设置右键菜单，包括在周边搜索、设置路线起止点、设置地图中心回到武汉，并绑定右键点击事件
+ * @param {null}
+ * @return {null}
+ */
+function setContextMenu() {
+    contextMenu = new AMap.ContextMenu();
+    contextMenu.addItem("在此点周边搜索", (e) => {
+        searchPoiNearBy(contextMenuPositon.lat, contextMenuPositon.lng);
+    }, 0);
+    contextMenu.addItem("设为出行起点", (e) => {
+        makeStartMarker(contextMenuPositon.lng, contextMenuPositon.lat);
+    }, 1);
+    contextMenu.addItem("设为出行终点", (e) => {
+        makeEndMarker(contextMenuPositon.lng, contextMenuPositon.lat);
+    }, 2);
+    contextMenu.addItem("回到武汉", () => {
+        map.value.setZoomAndCenter(12, wuhanCenter);
+    }, 3);
+    //地图绑定鼠标右击事件——弹出右键菜单
+    map.value.on('rightclick', (e) => {
+        contextMenu.open(map.value, e.lnglat);
+        contextMenuPositon = e.lnglat;
+    });
+}
 
-
-
+/**
+ * @description 监听聊天机器人回复，若回复内容包含“正在为您搜索：”，则自动搜索关键字
+ * @param {currentChatbotReply.value} 新值
+ * @todo 优化搜索逻辑，改善Bot回复内容
+ */
 watch(
     () => currentChatbotReply.value,
     (newValue, oldValue) => {
@@ -139,20 +155,22 @@ watch(
         } else {
             return;
         }
-        searchPoiByKeyword(searchKeyword.value,true);
+        searchPoiByKeyword(searchKeyword.value, true);
     }
 );
 
-
+// 地图搜索插件
 let placeSearch = null;
-function searchPoiByKeyword(searchKeyword,source,searchType=searchDefaultType) {
+/**
+ * @function searchPoiByKeyword
+ * @description 根据关键字搜索POI,在左侧搜索列表和地图上展示结果，点击列表或地图Marker进行下一步操作
+ * @param searchKeyword 搜索关键词
+ * @param source 调用函数的来源 true: 机器人回复触发，false: 用户搜索
+ * @param searchType 搜索POI的类型，默认为searchDefaultType
+ */
+function searchPoiByKeyword(searchKeyword, source, searchType = searchDefaultType) {
     if (searchKeyword == '') {
-        layer.msg('请输入搜索关键字', {
-            icon: 7,
-            time: 1500,
-            shade: true,
-            shadeOpacity: 0.25
-        })
+        showMessage('请输入搜索关键字', 'warning', 1500, true, 0.25);
         return;
     }
     if (placeSearch) {
@@ -193,8 +211,15 @@ function searchPoiByKeyword(searchKeyword,source,searchType=searchDefaultType) {
         });
     });
 }
-// 搜索周边POI
-function searchPoiNearBy(lat, lng,type=searchDefaultType,distance=1000) {
+/**
+ * @function searchPoiNearBy
+ * @description 根据经纬度搜索周边POI，在左侧搜索列表和地图上展示结果，点击列表或地图Marker进行下一步操作
+ * @param lat 鼠标当前纬度
+ * @param lng 鼠标当前经度
+ * @param type POI搜索类型
+ * @param distance 搜索半径
+ */
+function searchPoiNearBy(lat, lng, type = searchDefaultType, distance = 1000) {
     // 判断是否在武汉市
     if (lat < 29.9784 || lat > 31.3683 || lng < 113.8284 || lng > 115.0514) {
         layer.msg('请在武汉市内进行搜索', {
@@ -219,7 +244,7 @@ function searchPoiNearBy(lat, lng,type=searchDefaultType,distance=1000) {
             panel: 'panel', // 结果列表将在此容器中进行展示。
             autoFitView: true // 是否自动调整地图视野使绘制的 Marker点都处于视口的可见范围
         });  //构造地点查询类
-        placeSearch.searchNearBy('', [lng, lat], distance,  (status, result)=> {
+        placeSearch.searchNearBy('', [lng, lat], distance, (status, result) => {
             // 搜索成功时，result即是对应的匹配数据
             console.log(result);
             chatData.value.push(createMessage('chatbot', `已为您找到共${result.poiList.count}个相关地点`));
@@ -234,7 +259,11 @@ function searchPoiNearBy(lat, lng,type=searchDefaultType,distance=1000) {
     });
 }
 
-
+/**
+ * @function listElementClick
+ * @description 点击搜索列表元素，弹出提示框，选择设置当前POI为出行终点或收藏地点
+ * @param e 鼠标点击事件
+ */
 function listElementClick(e) {
     layer.confirm(`将${e.data.name}设置为？`,
         {
@@ -244,12 +273,7 @@ function listElementClick(e) {
                     text: '出行终点', callback: (id) => {
                         makeEndMarker(e.data.location.lng, e.data.location.lat);
                         if (!formulateCount.value[0]) {
-                            layer.msg('请先设置出行起点', {
-                                icon: 7,
-                                time: 1500,
-                                shade: true,
-                                shadeOpacity: 0.25
-                            })
+                            showMessage('请先设置出行起点', 'warning', 1500, true, 0.25);
                         }
                         layer.close(id);
                     }
@@ -279,9 +303,9 @@ function listElementClick(e) {
         <div class="searchcontainer">
             <span id="searchIcon"></span>
             <input id="tipinput" v-model="searchKeyword" type="text" placeholder="搜索地点" class="search"
-                @keyup.enter="searchPoiByKeyword(searchKeyword,false)">
+                @keyup.enter="searchPoiByKeyword(searchKeyword, false)">
             <lay-ripple>
-                <lay-button class="btnsearch" @click="searchPoiByKeyword(searchKeyword,false)">搜索</lay-button>
+                <lay-button class="btnsearch" @click="searchPoiByKeyword(searchKeyword, false)">搜索</lay-button>
             </lay-ripple>
         </div>
         <div id="panel"></div>
@@ -396,4 +420,4 @@ function listElementClick(e) {
 #myPageTop .btnsearch:hover {
     background-color: #1E9FFF;
 }
-</style>../services/MapServices
+</style>

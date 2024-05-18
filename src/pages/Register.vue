@@ -2,6 +2,7 @@
 import { ref,reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { layer } from "@layui/layui-vue";
+import { layerMessageType,showMessage } from '../services/LayMessageServices';
 
 const router = useRouter();
 // const toast = useToast();
@@ -10,7 +11,7 @@ const username = ref('');
 const password = ref('');
 const ispassword = ref('');
 const userinfoList = ref([]);
-const loginData = ref([]);
+// const loginData = ref([]);
 
 const model = reactive({
   username: '',
@@ -18,27 +19,26 @@ const model = reactive({
   ispassword: ''
 });
 
+/**
+ * @function registerBtn
+ * @description 注册按钮，暂时只是本地存储
+ * @param {string} username 用户名
+ * @param {string} password 密码
+ * @param {string} ispassword 确认密码
+ * @todo 与后端交互，实现用户注册逻辑
+ */
 const registerBtn = async () => {
-    // const valid = await this.$refs.registerForm.validate();
     // if (valid) {
-        if (password.value === ispassword.value) {
-            const obj = { name: username.value, password: password.value };
+        if (model.password === model.ispassword) {
+            const obj = { name: model.username, password: model.password };
             userinfoList.value.push(obj);
             localStorage.setItem('userinfo', JSON.stringify(userinfoList.value));
-            // toast.success('恭喜你注册成功!');
-            layer.msg('恭喜你注册成功!', {
-                icon: 1,
-                time: 1000,
-            });
+            showMessage('恭喜你注册成功!','success',1000);
             setTimeout(() => {
                 router.push({ name: 'Login' });
             }, 1000);
         } else {
-            // toast.fail('两次密码不一致!');
-            layer.msg('两次密码不一致!', {
-                icon: 2,
-                time: 1000,
-            });
+            showMessage('两次密码不一致!','error',1000);
         }
     // }
 };

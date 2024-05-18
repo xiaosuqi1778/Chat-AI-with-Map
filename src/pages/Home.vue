@@ -247,7 +247,10 @@ watch(
 
     <MapContainer/>
 
-    <ChatContainer/>
+    <div id="chatContainer">
+        <ChatContainer/>
+    </div>
+    
 
 </template>
 
@@ -261,13 +264,11 @@ body {
     position: absolute;
 }
 
-
-
 #container {
     position: absolute;
     top: auto;
     left: 0;
-    width: 71%;
+    width: 70%;
     height: calc(100% - 61px);
     /* box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.25); */
 }
@@ -401,5 +402,9 @@ body {
 /* 按钮悬浮时样式 */
 #myPageTop .btnsearch:hover {
     background-color: #1E9FFF;
+}
+
+#chatContainer{
+    width: 30%;
 }
 </style>
